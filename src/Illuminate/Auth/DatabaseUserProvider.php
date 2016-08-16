@@ -103,11 +103,18 @@ class DatabaseUserProvider implements UserProvider
         // generic "user" object that will be utilized by the Guard instances.
         $query = $this->conn->table($this->table);
 
+        $clientId = false;
+
         foreach ($credentials as $key => $value) {
-            if (! Str::contains($key, 'password')) {
-                $query->where($key, $value);
+            if (Str::contains($key, 'client_id')) {
+                $clientId = true;
             }
         }
+
+        if ($clientId)
+            $query->where('email', $credentials['email'])->where('client_id', $credentials['client_id']);
+        else
+            $query->where('email', $credentials['email']);
 
         // Now we are ready to execute the query to see if we have an user matching
         // the given credentials. If not, we will just return nulls and indicate
